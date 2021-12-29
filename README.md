@@ -1,5 +1,7 @@
 # githubexplorer-app
 
+Website, the user of which can enter a name and view public repositories, see readme.md, programming language, and so on. 
+
 ## Project setup
 ```
 npm install
