@@ -1,76 +1,51 @@
 <template>
-  <div class="rep-card">
-    <!-- <img :src="rep.owner.avatar_url" alt="" srcset=""> -->
-    <div class="rep-card__name-link">
-      <span class="rep-card__name">
-        {{ rep.name }}
-      </span>
-      <a class="rep-card__link" :href="rep.html_url" target="_blank"
-        >Open in GitHub</a
-      >
-    </div>
-    <div class="rep-info">
-      <p class="rep-info__data" v-if="rep.description">
-        Description:
-        <span class="rep-info__data--info">{{ rep.description }}</span>
-      </p>
-      <!-- <p class="rep-info__data">
-        Created at:
-        <span class="rep-info__data--info"
-          >{{ new Date(rep.created_at).toLocaleDateString() }}
-          {{ new Date(rep.created_at).toLocaleTimeString() }}</span
+  <div class="modal-inner" @click.self="Close">
+    <div class="rep-card">
+      <!-- <img :src="rep.owner.avatar_url" alt="" srcset=""> -->
+      <div class="rep-card__name-link">
+        <span class="rep-card__name">
+          {{ rep.name }}
+        </span>
+        <a class="rep-card__link" :href="rep.html_url" target="_blank"
+          >Open in GitHub</a
         >
-      </p>
-      <p class="rep-info__data" v-if="rep.language">
-        Language: <span class="rep-info__data--info">{{ rep.language }}</span>
-      </p> -->
-      <!-- <p class="rep-info__data">ReadMe file:</p> -->
-      <!-- <div class="rep-info__readme" v-html="readMe"></div> -->
-      <button class="rep-info__unfold" @click="ShowFullRep">View</button>
+      </div>
+      <div class="rep-info">
+        <p class="rep-info__data" v-if="rep.description">
+          Description:
+          <span class="rep-info__data--info">{{ rep.description }}</span>
+        </p>
+        <p class="rep-info__data">
+          Created at:
+          <span class="rep-info__data--info"
+            >{{ new Date(rep.created_at).toLocaleDateString() }}
+            {{ new Date(rep.created_at).toLocaleTimeString() }}</span
+          >
+        </p>
+        <p class="rep-info__data" v-if="rep.language">
+          Language: <span class="rep-info__data--info">{{ rep.language }}</span>
+        </p>
+        <p class="rep-info__data">ReadMe file:</p>
+        <div class="rep-info__readme" v-html="readMe"></div>
+        <button class="rep-info__unfold" @click="Close">Close</button>
+      </div>
     </div>
-    <transition name="slide-fade">
-      <rep-modal v-if="showRep" @close-modal="ShowFullRep" :rep="rep" />
-    </transition>
   </div>
 </template>
 
 <script>
 import { markdown } from "markdown";
-import RepModal from "@/components/RepModal.vue";
 
 export default {
-  components: { RepModal },
-  name: "repos-component",
+  name: "rep-modal",
   data() {
     return {
       readMe: "",
-      showRep: false,
     };
-  },
-  props: {
-    rep: {
-      type: Object,
-      default: () => {
-        return {};
-        // name: "",
-        // description: "",
-        // createDate: "",
-        // link: "",
-        // language: "",
-        // readme: "",
-      },
-    },
   },
   methods: {
     Close() {
-      this.showRep = !this.showRep;
-
-      document.body.style.overflow = this.showRep ? "hidden" : "visible";
-    },
-    ShowFullRep() {
-      this.showRep = !this.showRep;
-
-      document.body.style.overflow = this.showRep ? "hidden" : "visible";
+      this.$emit("close-modal");
     },
     UnFoldReadMe(event) {
       event.target.innerText =
@@ -97,22 +72,52 @@ export default {
   async mounted() {
     await this.GetReadMe();
   },
+  props: {
+    rep: {
+      type: Object,
+      default: () => {
+        return {};
+        // name: "",
+        // description: "",
+        // createDate: "",
+        // link: "",
+        // language: "",
+        // readme: "",
+      },
+    },
+  },
 };
 </script>
 
 <style lang="scss" scoped>
-.rep-modal {
+.modal-inner {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* align-content: center; */
+  z-index: 10;
+  background: #0000009c;
+  padding: 0px 10px;
 }
 .rep-card {
   display: flex;
+  position: relative;
   flex-direction: column;
   width: 100%;
-  // height: 100%;
-  // align-self: center;
-  max-width: 600px;
+  max-height: 600px;
+  height: auto;
+  overflow: hidden;
+  max-width: 700px;
+  width: 100%;
   background: #0d1117;
   border: 1px solid #30363d;
-  overflow: hidden;
   border-radius: 5px;
   box-shadow: 2.8px 2.8px 2.2px rgba(0, 0, 0, 0.02),
     6.7px 6.7px 5.3px rgba(0, 0, 0, 0.028),
@@ -128,8 +133,6 @@ export default {
     border-bottom: 1px solid #30363d;
     background-color: #161b22;
     align-items: center;
-    height: 100%;
-    max-height: 50px;
   }
   &__name {
     font-weight: bold;
@@ -144,12 +147,10 @@ export default {
     font-size: 15px;
     display: flex;
     flex-direction: column;
-    gap: 25px;
-    height: 100%;
-
+    gap: 15px;
+    
     &__data {
       font-weight: bold;
-
       &--info {
         font-weight: normal;
       }
@@ -173,13 +174,13 @@ export default {
     //   appearance: none;
     // }
     &__readme {
+      overflow-y: scroll;
       padding: 0px 15px;
       display: flex;
       flex-direction: column;
       gap: 10px;
-      max-height: 300px;
-      overflow-y: hidden;
-      box-shadow: 0px 21px 9px -20px #58a6ff;
+      max-height: 330px;
+      // box-shadow: 0px 21px 9px -20px #58a6ff;
       transition: box-shadow 0.2s ease-in-out;
 
       &--active {

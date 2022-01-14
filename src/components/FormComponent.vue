@@ -1,6 +1,6 @@
 <template>
   <form @submit.prevent="GetRepos">
-    <input type="text" v-model="userName">
+    <input type="text" v-model="userName" placeholder="Input user name">
     <button type="submit">Find repositories</button>
   </form>
 </template>
